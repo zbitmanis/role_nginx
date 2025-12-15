@@ -1,0 +1,26 @@
+---
+nginx_basic_auth_file: /etc/nginx/.htpasswd
+nginx_basic_auth_http_value: '{{ vault_nginx_basic_auth_http_value }}'
+nginx_enable_tls: true
+nginx_tls_dir: /etc/nginx/tls
+nginx_monitoring_sites_domain: fogc.space
+nginx_monitoring_basic_auth: false
+nginx_monitoring_sites: 
+  - server_name: 'grafana.{{ nginx_ext_domain }}'
+    ssl_certificate: '{{ nginx_tls_dir }}/grafana.pem' 
+    ssl_certificate_key: '{{ nginx_tls_dir }}/grafana.key' 
+    backend: 'http://localhost:3000/' 
+    config_name: monitoring-grafana
+  - server_name: 'prometheus.{{ nginx_ext_domain }}'
+    ssl_certificate: '{{ nginx_tls_dir }}/prometheus.pem' 
+    ssl_certificate_key: '{{ nginx_tls_dir }}/prometheus.key' 
+    backend: 'http://localhost:9090/'
+    basic_auth: '{{ nginx_monitoring_basic_auth }}'
+    config_name: monitoring-prometheus
+  - server_name: 'alertmanager.{{ nginx_ext_domain }}'
+    ssl_certificate: '{{ nginx_tls_dir }}/alertmanager.pem' 
+    ssl_certificate_key: '{{ nginx_tls_dir }}/alertmanager.key' 
+    backend: 'http://localhost:9093/'
+    config_name: monitoring-prometheus
+    basic_auth: '{{ nginx_monitoring_basic_auth }}'
+    config_name: monitoring-alertmanager

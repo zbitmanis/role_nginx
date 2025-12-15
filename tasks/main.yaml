@@ -1,0 +1,29 @@
+---
+- name: Install nginx server
+  package: 
+    name: nginx  
+    state: present
+
+- name: Prepare for nginx basic authentication
+  ansible.builtin.copy:
+    content: '{{ nginx_basic_auth_http_value }}'
+    dest:  '{{ nginx_basic_auth_file }}'
+    owner: root
+    group: root
+  tags:
+    - nginx
+
+- name: Configure nginx to serve as reverse proxy for monitoring
+  ansible.builtin.template:
+    src: nginx-monitoring.j2 
+    dest:  '/etc/nginx/sites-enabled/{{ nginx_site.config_name }}'
+    mode: '0644'
+    owner: root
+    group: root
+  notify:  Restart nginx service
+  loop:
+   '{{ nginx_monitoring_sites }}'
+  loop_control:
+    loop_var: nginx_site
+  tags:
+    - nginx
